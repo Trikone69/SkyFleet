@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-skyfleet}
+      MYSQL_USER: ${DB_USER:?Set DB_USER in .env}
+      MYSQL_PASSWORD: ${DB_PASS:?Set DB_PASS in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    ports: ["3306:3306"]
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+  api:
+    build: ./backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-skyfleet}
+      DB_USER: ${DB_USER:?Set DB_USER in .env}
+      DB_PASS: ${DB_PASS:?Set DB_PASS in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Set SEED_ADMIN_PASSWORD in .env}
+      SEED_PILOT_PASSWORD: ${SEED_PILOT_PASSWORD:?Set SEED_PILOT_PASSWORD in .env}
+      DEMO_DRONE_API_KEY: ${DEMO_DRONE_API_KEY:?Set DEMO_DRONE_API_KEY in .env}
+    depends_on: [db]
+    ports: ["8080:80"]
+  web:
+    image: node:20
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes: ["./frontend:/app"]
+    ports: ["5173:5173"]
+volumes:
+  dbdata:
