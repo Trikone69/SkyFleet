@@ -1,0 +1,18 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Dependencies and generated output
+node_modules/
+frontend/node_modules/
+backend/vendor/
+frontend/dist/
+
+# Local database files and editor/OS noise
+*.sql.gz
+*.log
+.DS_Store
+Thumbs.db
